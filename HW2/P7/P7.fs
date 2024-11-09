@@ -21,4 +21,8 @@ module BST =
   /// Add integer 'i' to 'bst' and return the resulting BST. If 'bst' already
   /// contains 'i' in one of its nodes, just return the same BST.
   let rec add (i: int) (bst: BST) : BST =
-    bst // TODO
+    match bst with
+    | Node (v, left, right) ->
+      if i = v then bst else
+      if i < v then Node (v, add i left, right) else Node (v, left, add i right)
+    | Empty -> Node (i, Empty, Empty)

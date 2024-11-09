@@ -5,4 +5,6 @@ module P1
 
 /// Return a list reversed from the argument 'l'.
 let rec reverse (l: List<'a>) : List<'a> =
-  [] // TODO
+  match l with
+  | [] -> []
+  | head :: tail -> (reverse tail) @ [head]

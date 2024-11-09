@@ -7,4 +7,9 @@ module P3
 /// lists". For example, "unzip [(1, 10); (2, 20); (3, 30)]" must return
 /// "([1; 2; 3], [10; 20; 30])" as a result.
 let rec unzip (l: ('a * 'b) list) : 'a list * 'b list =
-  ([], []) // TODO
+  match l with
+  | [] -> ([], [])
+  | head :: tail ->
+    let (a, b) = head
+    let (a_list, b_list) = unzip tail
+    (a :: a_list, b :: b_list)

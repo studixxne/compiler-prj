@@ -27,33 +27,27 @@ let rec checkExp (symTab: SymbolTable) (e: Exp) : Typ =
   | Num _ -> Int
   | Boolean _ -> Bool
 
-  // Null Type이 너무 헷갈리는데 좀 있다 체크해보자.
   | Var var_name ->
     match Map.tryFind var_name symTab with
     | Some var_ctype-> ctypeToTyp var_ctype
     | None -> Error
 
-  // 나중에 다시 와서 체크해보자
   | Deref var_name -> // EX) *x
     match Map.tryFind var_name symTab with
     | Some var_ctype -> 
-      // IntPtr에 Int가 가르키는 지 체크도 해줘야 하는데 모르겠네 ㅎㅎ..;
-      match ctypeToTyp var_ctype with
-      | IntPtr -> Int
-      | BoolPtr -> Bool
+      match var_ctype with
+      | CIntPtr -> Int
+      | CBoolPtr -> Bool
       | _ -> Error
     | None -> Error
 
-  // NullPtr 어캐 계산..? 생각해보자요..
-  // None일때 nullPtr로 해야하나?
   | AddrOf var_name -> // EX) &x
     match Map.tryFind var_name symTab with
     | Some var_ctype ->
-      match ctypeToTyp var_ctype with
-      | Int -> IntPtr
-      | Bool -> BoolPtr
+      match var_ctype with
+      | CInt -> IntPtr
+      | CBool -> BoolPtr
       | _ -> Error
-    // 이거 Nullptr 반환해야 하나..? 잘모르겠네;
     | None -> Error
 
   | Neg e1 -> 
@@ -75,8 +69,8 @@ let rec checkExp (symTab: SymbolTable) (e: Exp) : Typ =
     | (Int, Int) -> Bool
     | (Bool, Bool) -> Bool
     | (NullPtr, NullPtr) -> Bool
-    | (IntPtr, IntPtr) | (IntPtr, NullPtr) -> Bool
-    | (BoolPtr, BoolPtr) | (BoolPtr, NullPtr) -> Bool
+    | (IntPtr, IntPtr) | (IntPtr, NullPtr) | (NullPtr, IntPtr) -> Bool
+    | (BoolPtr, BoolPtr) | (BoolPtr, NullPtr) | (NullPtr, BoolPtr) -> Bool
     | _ -> Error
     
   | LessEq (e1, e2) | LessThan (e1, e2) | GreaterEq (e1, e2) | GreaterThan (e1, e2) ->
@@ -146,19 +140,21 @@ let rec checkStmt (symTab: SymbolTable) (retTyp: CType) (stmt: Stmt) =
     | _ -> ([line], symTab)
 
   | If (line, e, true_stmts, false_stmts) ->
+    let true_list = checkStmts symTab retTyp true_stmts
+    let false_list = checkStmts symTab retTyp false_stmts
     match checkExp symTab e with
     | Bool | Int | NullPtr | IntPtr | BoolPtr ->
-      let true_list = checkStmts symTab retTyp true_stmts
-      let false_list = checkStmts symTab retTyp false_stmts
       (true_list @ false_list, symTab)
-    | _ -> ([line], symTab)
+    | _ ->
+      ([line] @ true_list @ false_list, symTab)
 
   | While (line, e, true_stmts) ->
+    let true_list = checkStmts symTab retTyp true_stmts
     match checkExp symTab e with
     | Bool ->
-      let true_list = checkStmts symTab retTyp true_stmts
       (true_list, symTab)
-    | _ -> ([line], symTab)
+    | _ ->
+      ([line] @ true_list, symTab)
 
 // Check the statement list and return the line numbers of semantic errors. Note
 // that 'checkStmt' and 'checkStmts' are mutually-recursive (they can call each

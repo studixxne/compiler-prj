@@ -1,0 +1,36 @@
+int f(bool b, int i) {
+  int x = i;
+  int y = b;
+
+  if (x == true) {
+    i = i - b * 2;
+    bool i;
+    i = 10;
+  }
+  else {
+    i = i - b * 2;
+    bool i;
+    i = 10;
+  }
+
+  while(x == true) {
+    i = i - b * 2;
+    bool i;
+    i = &x;
+  }
+
+  int test_1;
+  test_1 = -1;
+
+  int test_2 = -(3 * &test_1);
+  bool test_3 = !b;
+
+  if (x >= 1 && b){
+     int test_4 = &x;
+  }
+
+  int *test_5 = &x;
+
+
+  return *test_5;
+}

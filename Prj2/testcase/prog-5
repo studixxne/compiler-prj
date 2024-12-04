@@ -1,0 +1,12 @@
+int g(int x, int y) {
+  int* k;
+  int q = 10;
+  k = &q;
+  
+  if (y == 0 || x / y == 10) {
+    *k = 100;
+    return *k;
+  } else {
+    return *k;
+  }
+}
